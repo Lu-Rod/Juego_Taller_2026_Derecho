@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Detective Legal — Resuelve los casos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="character-choice.css">
+</head>
+<body data-state="title">
+
+  <!-- Fondo animado de la ciudad (pantalla de inicio y final) -->
+  <canvas id="title-canvas" width="320" height="180" aria-hidden="true"></canvas>
+
+  <!-- Botones fijos: modo claro/oscuro y sonido -->
+  <div class="fabs">
+    <button id="btn-theme" class="fab" type="button" aria-label="Cambiar a modo claro" title="Modo claro / oscuro">☀️</button>
+    <button id="btn-sound" class="fab" type="button" aria-label="Abrir controles de volumen" title="Volumen" aria-expanded="false" aria-controls="sound-controls">🔊</button>
+    <div id="sound-controls" class="sound-controls" role="group" aria-label="Controles de volumen" hidden>
+      <label for="music-volume">Música <output id="music-volume-value" for="music-volume">15%</output></label>
+      <input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.15">
+      <label for="sfx-volume">Efectos de sonido <output id="sfx-volume-value" for="sfx-volume">100%</output></label>
+      <input id="sfx-volume" type="range" min="0" max="1" step="0.01" value="1">
+    </div>
+  </div>
+  <audio id="background-music" src="Musica/Musica_Derecho.mp3" loop preload="auto"></audio>
+
+  <!-- ════════ INICIO ════════ -->
+  <section id="screen-title" class="overlay on" aria-label="Pantalla de inicio">
+    <div class="panel title-panel">
+      <h1 class="logo" id="logo" aria-label="Detective Legal"></h1>
+      <p class="tagline">Resuelve los casos</p>
+      <p class="lead">Un expediente llegó a tu escritorio. Recorré cuatro escenarios, hablá con cada personaje y resolvé su caso: desde un conflicto cotidiano hasta el veredicto.</p>
+
+      <div class="level-cards">
+        <div class="lcard c0"><span class="lc-ico">🏫</span><b>Liceo</b><span>Conflicto y convivencia</span></div>
+        <div class="lcard c1"><span class="lc-ico">🚔</span><b>Comisaría</b><span>Reconocé el delito</span></div>
+        <div class="lcard c2"><span class="lc-ico">🏛️</span><b>Tribunal</b><span>Aplicá la ley</span></div>
+        <div class="lcard c3"><span class="lc-ico">⚖️</span><b>Audiencia</b><span>Dictá el veredicto</span></div>
+      </div>
+
+      <p class="note">Actividad de aprendizaje jurídico. Los casos son breves y no sustituyen el análisis de una situación real.</p>
+
+      <div class="detective-choice" role="group" aria-label="Elegí tu detective">
+        <p>Elegí tu detective</p>
+        <div class="detective-options">
+          <button class="detective-option selected" type="button" data-detective="female" aria-pressed="true">
+            <span aria-hidden="true">🕵️‍♀️</span> Femenina
+          </button>
+          <button class="detective-option" type="button" data-detective="male" aria-pressed="false">
+            <span aria-hidden="true">🕵️‍♂️</span> Masculino
+          </button>
+        </div>
+      </div>
+
+      <button id="btn-start" class="btn primary big" type="button">▶ Abrir expediente</button>
+      <p class="controls">
+        <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> o <kbd>W A S D</kbd> mover ·
+        <kbd>Enter</kbd> hablar · <kbd>1</kbd>–<kbd>4</kbd> responder
+      </p>
+    </div>
+  </section>
+
+  <!-- ════════ JUEGO ════════ -->
+  <main id="screen-game" aria-label="Juego">
+    <header id="hud">
+      <div class="hud-level" id="hud-level">NIVEL 1 · COMISARÍA</div>
+      <div class="hud-pips" id="hud-pips" aria-label="Casos del nivel"></div>
+      <div class="hud-lives" id="hud-lives" aria-label="Vidas"></div>
+      <div class="hud-score">PUNTOS <span id="hud-score">0</span></div>
+    </header>
+    <div id="stage">
+      <canvas id="game" width="1280" height="768" aria-label="Mapa del juego"></canvas>
+    </div>
+  </main>
+
+  <!-- ════════ INTRO DE NIVEL ════════ -->
+  <section id="intro" class="overlay" aria-label="Inicio de nivel">
+    <div class="panel intro-panel">
+      <div class="intro-icon" id="intro-icon">🚔</div>
+      <p class="intro-num" id="intro-num">NIVEL 1</p>
+      <h2 id="intro-title"></h2>
+      <p class="intro-desc" id="intro-desc"></p>
+      <ul class="intro-npcs" id="intro-npcs"></ul>
+      <button id="btn-enter" class="btn good" type="button">▶ Entrar</button>
+    </div>
+  </section>
+
+  <!-- ════════ DIÁLOGO ════════ -->
+  <div id="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-name">
+    <div class="sheet">
+      <div class="portrait"><canvas id="dlg-portrait" width="48" height="56"></canvas></div>
+      <div class="dlg-body">
+        <div class="dlg-head">
+          <span id="dlg-name" class="dlg-name"></span>
+          <span id="dlg-role" class="dlg-role"></span>
+        </div>
+        <p id="dlg-say" class="dlg-say"></p>
+        <p id="dlg-q" class="dlg-q"></p>
+        <div id="dlg-opts" class="dlg-opts"></div>
+        <div id="dlg-fb" class="dlg-fb">
+          <p id="fb-verdict" class="fb-verdict"></p>
+          <p id="fb-exp" class="fb-exp"></p>
+          <p class="fb-norma">📋 <span id="fb-label">Norma:</span> <a id="fb-link" target="_blank" rel="noopener"></a></p>
+          <button id="btn-continue" class="btn primary" type="button">Continuar ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ FINAL ════════ -->
+  <section id="end" class="overlay" aria-label="Resultado final">
+    <div class="panel end-panel">
+      <div class="end-icon" id="end-icon">🏆</div>
+      <h2 id="end-title"></h2>
+      <p class="end-score"><span id="end-points">0</span> puntos · <span id="end-correct">0/13</span> correctas</p>
+      <p id="end-msg" class="end-msg"></p>
+      <ul id="end-list" class="end-list"></ul>
+      <section class="credits" aria-label="Créditos">
+        <h3>Autores</h3>
+        <p>Estudiante del profesorado de Informática Lucia Rodriguez</p>
+        <p>Estudiante del profesorado de Derecho y Sociologia Marco Masares</p>
+        <h3>Docente a cargo</h3>
+        <p>Domingo Pérez</p>
+      </section>
+      <button id="btn-restart" class="btn primary" type="button">↺ Nuevo caso</button>
+    </div>
+  </section>
+
+  <!-- ════════ CONTROLES TÁCTILES ════════ -->
+  <div id="pad" aria-hidden="true">
+    <div class="dpad">
+      <button class="pb up"    type="button" data-dir="up">▲</button>
+      <button class="pb left"  type="button" data-dir="left">◀</button>
+      <button class="pb right" type="button" data-dir="right">▶</button>
+      <button class="pb down"  type="button" data-dir="down">▼</button>
+    </div>
+    <button id="btn-act" class="pb act" type="button">HABLAR</button>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="fade"></div>
+
+  <noscript>Este juego necesita JavaScript activado.</noscript>
+  <script src="game.js"></script>
+</body>
+</html>

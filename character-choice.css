@@ -1,0 +1,46 @@
+.detective-choice{margin:0 auto 20px}
+.detective-choice>p{font-family:var(--font-pixel);font-size:11px;color:var(--gold);margin-bottom:10px}
+.detective-options{display:flex;justify-content:center;gap:12px}
+.detective-option{
+  min-width:170px;padding:10px 14px;cursor:pointer;
+  border:3px solid var(--edge);border-radius:8px;
+  background:var(--panel2);color:var(--text);box-shadow:0 4px 0 var(--shadow);
+}
+.detective-option span{font-size:26px;vertical-align:middle}
+.detective-option.selected{border-color:var(--gold);background:var(--chip);box-shadow:0 0 0 2px var(--gold),0 4px 0 var(--shadow)}
+.detective-option:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+@media(max-width:700px){
+  .detective-options{gap:8px}
+  .detective-option{min-width:0;padding:9px 10px}
+}
+
+.sound-controls{
+  position:absolute;
+  top:56px;
+  right:0;
+  width:min(270px,calc(100vw - 20px));
+  padding:14px;
+  background:var(--panel);
+  color:var(--text);
+  border:3px solid var(--edge);
+  border-radius:8px;
+  box-shadow:5px 5px 0 var(--shadow);
+  font-size:21px;
+}
+.sound-controls[hidden]{display:none}
+.sound-controls label{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:4px;
+}
+.sound-controls output{color:var(--gold)}
+.sound-controls input[type="range"]{
+  display:block;
+  width:100%;
+  margin:0 0 12px;
+  accent-color:var(--gold);
+  cursor:pointer;
+}
+.sound-controls input[type="range"]:last-child{margin-bottom:0}
